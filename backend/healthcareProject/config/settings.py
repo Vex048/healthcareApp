@@ -56,9 +56,6 @@ ROOT_URLCONF = 'config.urls'
 
 dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 dir_templates_main = BASE_DIR / 'templates'
-# dir_templates_accounts = BASE_DIR / "accounts" / 'templates'
-# print(dir_templates_main)
-# print(dir_templates_accounts)
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
