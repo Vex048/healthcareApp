@@ -5,3 +5,9 @@ def showDoctors(request):
     doctors = Doctor.objects.all()
     doctors = {'doctors': doctors}
     return render(request, 'doctors/showDoctors.html',doctors)
+
+
+def doctorProfile(request,id):
+    doctor = Doctor.objects.get(id=id)
+    doctor = {'doctor': doctor}
+    return render(request,'doctors/doctorProfile.html',doctor)

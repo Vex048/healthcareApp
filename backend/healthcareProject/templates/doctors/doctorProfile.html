@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class = "container">
+    <h1>Doctor Profile</h1>
+    <table class = "table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Name</th>
+                <th>Specialization</th>
+                <th>Experience</th>
+                <th>Qualification</th>
+                <th>Consultation Fee</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ doctor.id }}</td>
+                <td>{{ doctor.email }}</td>
+                {% if doctor.second_name == None %}
+                <td>{{ doctor.first_name }} {{ doctor.last_name }}</td>
+                {% else %}
+                <td>{{ doctor.first_name }} {{ doctor.second_name }} {{ doctor.last_name }}</td>
+                {% endif %}
+                <td>{{ doctor.specialization }}</td>
+                <td>{{ doctor.experience }}</td>
+                <td>{{ doctor.qualification }}</td>
+                <td>{{ doctor.consultation_fee }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

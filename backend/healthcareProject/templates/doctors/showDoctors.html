@@ -16,10 +16,11 @@
                 <td>{{ doctor.id }}</td>
                 <td>{{ doctor.email }}</td>
                 {% if doctor.second_name == None %}
-                <td>{{ doctor.first_name }} {{ doctors.last_name }}</td>
+                <td><a href="{% url 'doctors:doctorProfile' doctor.id %}">{{ doctor.first_name }} {{ doctor.last_name }}</a></td>
                 {% else %}
-                <td>{{ doctor.first_name }} {{ doctor.second_name }} {{ doctor.last_name }}</td>
+                <td><a href="{% url 'doctors:doctorProfile' doctor.id %}">{{ doctor.first_name }} {{ doctor.second_name }} {{ doctor.last_name }}</a></td>
                 {% endif %}
+
             </tr>
             {% endfor %}
         </tbody>
