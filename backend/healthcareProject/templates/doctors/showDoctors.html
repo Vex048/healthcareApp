@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>Doctors</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for doctor in doctors %}
+            <tr>
+                <td>{{ doctor.id }}</td>
+                <td>{{ doctor.email }}</td>
+                {% if doctor.second_name == None %}
+                <td>{{ doctor.first_name }} {{ doctors.last_name }}</td>
+                {% else %}
+                <td>{{ doctor.first_name }} {{ doctor.second_name }} {{ doctor.last_name }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

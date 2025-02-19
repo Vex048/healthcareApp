@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>Welcome to HealthcareApp</h1>
+    <p>Your one-stop solution for managing healthcare services.</p>
+    
+    <div class="features">
+        <h2>Features</h2>
+        <ul>
+            <li>Manage appointments</li>
+            <li>Access medical records</li>
+            <li>Consult with doctors online</li>
+            <li>Receive health tips and updates</li>
+        </ul>
+        <a href="{% url 'accounts:showUsers' %}">Show all users</a>
+        <a href="{% url 'doctors:showDoctors' %}">Show all Doctors</a>
+    </div>
+</div>
+{% endblock %}
