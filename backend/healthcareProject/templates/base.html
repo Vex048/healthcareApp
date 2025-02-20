@@ -8,13 +8,7 @@
     <link rel="stylesheet" href="{% static 'css/global.css' %}">
 </head>
 <body>
-    <nav class="navbar">
-        <a class="navbar-brand" href="{% url 'home' %}">Healthcare Project</a>
-        <div class="navbar-nav">
-            <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
-            <a class="nav-link" href="{% url 'accounts:register' %}">Register</a>
-        </div>
-    </nav>
+    {% include 'navbar.html' %}
     <main>
         {% block content %}
         {% endblock %}
