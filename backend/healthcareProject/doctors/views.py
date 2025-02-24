@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Doctor
+from .models import Doctor,Profile
 # Create your views here.
 def showDoctors(request):
     doctors = Doctor.objects.all()
@@ -9,5 +9,9 @@ def showDoctors(request):
 
 def doctorProfile(request,id):
     doctor = Doctor.objects.get(id=id)
-    doctor = {'doctor': doctor}
-    return render(request,'doctors/doctorProfile.html',doctor)
+    profile = Profile.objects.get(doctor_id=id)
+    context = {'doctor': doctor,'profile':profile}
+    return render(request,'doctors/doctorProfile.html',context)
+
+def makeAppointment(request,id):
+    return render(request, 'doctors/makeAppointment.html')

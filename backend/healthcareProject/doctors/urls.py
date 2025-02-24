@@ -5,5 +5,6 @@ urlpatterns = [
     # path('dashboard/', views.doctor_dashboard, name='doctor_dashboard'),
     # path('upload-image/', views.upload_image, name='upload_image'),
     path('showDoctors/', views.showDoctors, name='showDoctors'),
-    path("doctorProfile/<int:id>",views.doctorProfile,name='doctorProfile')
+    path("doctorProfile/<int:id>",views.doctorProfile,name='doctorProfile'),
+    path("makeAppointment/<int:id>",views.makeAppointment,name='makeAppointment'),
 ]
