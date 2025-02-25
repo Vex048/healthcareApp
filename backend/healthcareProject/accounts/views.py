@@ -30,8 +30,8 @@ def logoutUser(request):
     logout(request)
     return redirect('home')
 
-def showProfile(request):
-    return render(request, 'accounts/profile.html')
+# def showProfile(request):
+#     return render(request, 'accounts/profile.html')
 
 def showAllUsers(request):
     users = User.objects.all()

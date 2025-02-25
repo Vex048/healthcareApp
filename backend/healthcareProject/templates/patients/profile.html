@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>Profile</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Email</th>
+                <th>Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ user.id }}</td>
+                <td>{{ user.email }}</td>
+                {% if user.second_name == None %}
+                <td>{{ user.first_name }} {{user.last_name}}</td>
+                {% else %}
+                <td>{{ user.first_name }} {{ user.second_name }} {{ user.last_name }}</td>
+                {% endif %}
+            </tr>
+        </tbody>
+    </table>
+    {% if medical_record != None %}
+    <div class="medical-record">
+        <h2>Medical Record</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Record ID</th>
+                    <th>Doctor</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ medical_record.id }}</td>
+                    <td>{{ medical_record.doctor }}</td>
+                    <td>{{ medical_record.date }}</td>
+                    <td>{{ medical_record.description }}</td>
+                </tr>
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

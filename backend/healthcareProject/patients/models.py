@@ -10,6 +10,7 @@ class Patient(models.Model):
 
 # Create your models here.
 class MedicalRecord(models.Model):
+    id = models.AutoField(primary_key=True)
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE)
     doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE)
     date = models.DateField()
