@@ -2,7 +2,7 @@
 {% block content %}
 <div class="appointment-form">
     <h1>Make an Appointment</h1>
-    <div method="POST">
+    <form method="POST" action="">
         {% csrf_token %}
         <div class="form-group">
             <label for="date">Date</label>
@@ -17,6 +17,6 @@
             <textarea class="form-control" id="description" name="description"></textarea>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
-    </div>
+    </form>
 </div>
 {% endblock %}

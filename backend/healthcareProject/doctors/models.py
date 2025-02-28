@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 
 # Create your models here.
 class Doctor(models.Model):
@@ -8,8 +8,7 @@ class Doctor(models.Model):
     second_name = models.CharField(max_length=100,null=True,blank=True)
     last_name = models.CharField(max_length=100)
     email = models.EmailField(max_length=100)
-
-    
+    user = models.OneToOneField(User,on_delete=models.CASCADE,null=True,blank=True)
     def __str__(self):
         if self.second_name == None:
             return self.first_name + " " + self.last_name
@@ -36,5 +35,6 @@ class Appointment(models.Model):
     patient_id=models.ForeignKey('patients.Patient',on_delete=models.CASCADE)
     date=models.DateField()
     time=models.TimeField()
+    description=models.TextField(null=True,blank=True)
     def __str__(self):
         return self.doctor_id.first_name + " " + self.doctor_id.last_name + " " + self.patient_id.user.username + " " + str(self.date) + " " + str(self.time)

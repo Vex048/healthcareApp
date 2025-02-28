@@ -22,9 +22,37 @@
             </tr>
         </tbody>
     </table>
+    {% if appointments != None %}
+    <div class = "appointments">
+        <h2>Appointments</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Appointment ID</th>
+                    <th>Doctor</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                <tr>
+                    <td>{{ appointment.id }}</td>
+                    <td>{{ appointment.doctor_id }}</td>
+                    <td>{{ appointment.date }}</td>
+                    <td>{{ appointment.time }}</td>
+                    <td> {{ appointment.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+
     {% if medical_record != None %}
     <div class="medical-record">
-        <h2>Medical Record</h2>
+        <h3>Medical Record</h3>
         <table class="table">
             <thead>
                 <tr>
@@ -35,12 +63,14 @@
                 </tr>
             </thead>
             <tbody>
+                {% for record in medical_record %}
                 <tr>
-                    <td>{{ medical_record.id }}</td>
-                    <td>{{ medical_record.doctor }}</td>
-                    <td>{{ medical_record.date }}</td>
-                    <td>{{ medical_record.description }}</td>
+                    <td>{{ record.id }}</td>
+                    <td>{{ record.doctor }}</td>
+                    <td>{{ record.date }}</td>
+                    <td>{{ record.description }}</td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
         {% endif %}
