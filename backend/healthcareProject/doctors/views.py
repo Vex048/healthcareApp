@@ -22,7 +22,6 @@ def makeAppointment(request,id):
         date = request.POST.get('date')
         time = request.POST.get('time')
         desc = request.POST.get('description')
-        print(id)
         doc = Doctor.objects.get(id=id)
         Appointment.objects.create(doctor_id=doc,patient_id=request.user.patient,date=date,time=time,description=desc)
         return render(request, 'doctors/makeAppointment.html')
