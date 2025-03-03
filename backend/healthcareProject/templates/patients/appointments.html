@@ -17,7 +17,7 @@
             {% for appointment in appointments %}
             <tr>
                 <td>{{ appointment.id }}</td>
-                <td>{{ appointment.doctor_id }}</td>
+                <td><a class="doctor-link" href="{% url 'doctors:doctorProfile' appointment.doctor_id.id %}">{{ appointment.doctor_id }}</a></td>
                 <td>{{ appointment.date }}</td>
                 <td>{{ appointment.time }}</td>
                 <td> {{ appointment.description }}</td>

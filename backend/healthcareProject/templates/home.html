@@ -12,8 +12,13 @@
             <li>Consult with doctors online</li>
             <li>Receive health tips and updates</li>
         </ul>
-        <a href="{% url 'accounts:showAllUsers' %}">Show all users</a>
-        <a href="{% url 'doctors:showDoctors' %}">Show all Doctors</a>
+        <div class = "button-view">
+            <a href="{% url 'accounts:showAllUsers' %}" class="btn btn-primary">Show all users</a>
+        </div>
+
+        <div class = "button-view">
+            <a href="{% url 'doctors:showDoctors' %}" class="btn btn-primary">Show all Doctors</a>
+        </div>        
     </div>
 </div>
 {% endblock %}

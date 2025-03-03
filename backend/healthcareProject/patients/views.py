@@ -1,3 +1,4 @@
+import datetime
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
@@ -15,7 +16,7 @@ def showPatientProfile(request):
         except:
             medical_record = None
         try:
-            appointments = Appointment.objects.filter(patient_id=request.user.patient)
+            appointments = Appointment.objects.filter(patient_id=request.user.patient).filter(date__gte=datetime.date.today())
         except:
             appointments = None
         context = {'medical_record': medical_record,"appointments":appointments}
@@ -27,6 +28,12 @@ def view_records(request,id):
     medical_record = MedicalRecord.objects.filter(patient=patient)
     context = {'medical_record': medical_record}
     return render(request, 'patients/medicalReport.html',context)
+
+
+def upcomingAppointmets(request):
+    patient = Patient.objects.get(user=request.user)
+    
+    
 
 def view_appointments(request,id):
     patient = Patient.objects.get(user=request.user)
