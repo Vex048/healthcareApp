@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+{% if medical_record != None %}
+<div class="medical-record-own">
+    <h1>Medical Record - {{ user.first_name }} {{ user.last_name }} </h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Record ID</th>
+                <th>Doctor</th>
+                <th>Date</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in medical_record %}
+            <tr>
+                <td>{{ record.id }}</td>
+                <td>{{ record.doctor }}</td>
+                <td>{{ record.date }}</td>
+                <td>{{ record.description }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+
+
+{% endblock %}

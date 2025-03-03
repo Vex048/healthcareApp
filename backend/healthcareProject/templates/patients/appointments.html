@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+{% if appointments != None %}
+<div class = "appointments-own">
+    <h1>Appointments - {{ user.first_name }} {{ user.last_name }}</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Appointment ID</th>
+                <th>Doctor</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+            <tr>
+                <td>{{ appointment.id }}</td>
+                <td>{{ appointment.doctor_id }}</td>
+                <td>{{ appointment.date }}</td>
+                <td>{{ appointment.time }}</td>
+                <td> {{ appointment.description }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+</div>
+
+
+{% endblock %}

@@ -1,27 +1,17 @@
 {% extends "base.html" %}
+{% load static %}
 {% block content %}
 <div class="container">
     <h1>Profile</h1>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Email</th>
-                <th>Name</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>{{ user.id }}</td>
-                <td>{{ user.email }}</td>
-                {% if user.second_name == None %}
-                <td>{{ user.first_name }} {{user.last_name}}</td>
-                {% else %}
-                <td>{{ user.first_name }} {{ user.second_name }} {{ user.last_name }}</td>
-                {% endif %}
-            </tr>
-        </tbody>
-    </table>
+    <div class="profile-header">
+        <div class="profile-photo">
+            <img src="{% static 'images/Portrait_Placeholder.png' %}" alt="User Photo">
+        </div>
+        <div class="profile-info">
+            <h2>{{ user.first_name }} {% if user.second_name %}{{ user.second_name }}{% endif %} {{ user.last_name }}</h2>
+            <p>Email: {{ user.email }}</p>
+        </div>
+    </div>
     {% if appointments != None %}
     <div class = "appointments">
         <h2>Appointments</h2>
@@ -74,6 +64,12 @@
             </tbody>
         </table>
         {% endif %}
+        <div class ="button-view">
+            <a href="{% url 'patients:view_records' user.id %}" class="btn btn-primary">View Medical Report</a>
+        </div>
+        <div class ="button-view">
+            <a href="{% url 'patients:view_appointments' user.id %}" class="btn btn-primary">View Appointments</a>
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -1,11 +1,16 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block content %}
 <div class="container">
     <h1>Doctor Profile</h1>
     <div class="profile-header">
-        <h2>{{ doctor.first_name }} {% if doctor.second_name %}{{ doctor.second_name }}{% endif %} {{ doctor.last_name }}</h2>
-        <p>Email: {{ doctor.email }}</p>
+        <div class="profile-photo">
+            <img src="{% static 'images/Portrait_Placeholder.png' %}" alt="Doctor Photo">
+        </div>        
+        <div class="profile-info">
+            <h2>{{ doctor.first_name }} {% if doctor.second_name %}{{ doctor.second_name }}{% endif %} {{ doctor.last_name }}</h2>
+            <p>Email: {{ doctor.email }}</p>
+        </div>
     </div>
     <div class="profile-details">
         <h3>Professional Details</h3>
