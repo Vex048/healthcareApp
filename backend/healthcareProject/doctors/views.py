@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+from django.contrib import messages
 from patients.models import Patient,MedicalRecord
 from .models import Appointment, Doctor,Profile
 # Create your views here.
@@ -12,7 +12,10 @@ def showDoctors(request):
 def doctorProfile(request,id):
     doctor = Doctor.objects.get(id=id)
     profile = Profile.objects.get(doctor_id=id)
-    is_doctor = Doctor.objects.filter(user=request.user).exists()
+    try:
+        is_doctor = Doctor.objects.filter(user=request.user).exists()
+    except:
+        is_doctor = None
     #is_patient = Patient.objects.filter(user=request.user).exists()
     context = {'doctor': doctor,'profile':profile, 'is_doctor': is_doctor}
     return render(request,'doctors/doctorProfile.html',context)
