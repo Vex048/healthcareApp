@@ -1,7 +1,8 @@
+import datetime
 from django.shortcuts import render
 from django.contrib import messages
 from patients.models import Patient,MedicalRecord
-from .models import Appointment, Doctor,Profile
+from .models import Appointment, DLModels, Doctor, ModelResult,Profile
 # Create your views here.
 def showDoctors(request):
     doctors = Doctor.objects.all()
@@ -42,3 +43,22 @@ def createReport(request):
     patients= Patient.objects.all()
     context = {"patients":patients}
     return render(request, 'doctors/createReport.html',context)
+
+def listModels(request):
+    models = DLModels.objects.all()
+    context = {'models':models}
+    return render(request,'doctors/DeepLearningModels.html',context)
+
+def model(request,id):
+    model = DLModels.objects.get(id=id)
+    if request.method == "POST":
+        image = request.FILES['image']
+        print(str(image))  
+        #Proccesing image with model
+        result = "Output of model will be here"   
+        result = ModelResult.objects.create(model_id=model,result=result,date=datetime.datetime.now())
+        messages.success(request, 'Result added')
+        context = {'model':model,'result':result}
+        return render(request,'doctors/models/results.html',context)
+    context = {'model':model}
+    return render(request,'doctors/models/models_template.html',context)

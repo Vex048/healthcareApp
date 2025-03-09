@@ -38,7 +38,9 @@
     <div class="button-view">
         <a href="{% url 'doctors:createReport' %}" class="btn btn-primary">Create Report</a>
     </div>
-
+    <div class ="button-view">
+        <a href="{% url 'doctors:listModels' %}" class="btn btn-primary">Go to your models</a>
+    </div>
     {% endif %}
     <div class="button-view">
       <a href = "{% url 'doctors:showDoctors' %}" class="btn btn-primary">Back</a>

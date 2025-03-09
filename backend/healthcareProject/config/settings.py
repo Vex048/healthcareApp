@@ -39,7 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "accounts",
     "patients",
-    "doctors"
+    "doctors",
 ]
 
 MIDDLEWARE = [
@@ -61,7 +61,7 @@ MESSAGE_TAGS = {
 }
 
 ROOT_URLCONF = 'config.urls'
-
+CORS_ORIGIN_ALLOW_ALL = True
 dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 dir_templates_main = BASE_DIR / 'templates'
 TEMPLATES = [
@@ -81,7 +81,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases

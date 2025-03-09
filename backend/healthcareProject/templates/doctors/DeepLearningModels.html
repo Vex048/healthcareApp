@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="models-table">
+    <h1>Deep Learning Models</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Model Name</th>
+                <th>Model Type</th>
+                <th>Model Description</th>
+                <th>View Model</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for model in models %}
+            <tr>
+                <td>{{ model.name }}</td>
+                <td>{{ model.type }}</td>
+                <td>{{ model.descritpion }}</td>
+                <td>
+                    <div class ="button-view">
+                    <a href="{% url 'doctors:model' model.id %}" class="btn btn-primary">View Model</a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="profile-footer">
+        <a href = "{% url 'doctors:showDoctors' %}" class="btn btn-primary">Back</a>
+    </div>
+</div>
+{% endblock %}

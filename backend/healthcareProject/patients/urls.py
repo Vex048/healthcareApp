@@ -1,6 +1,7 @@
-from django.urls import path
+from django.urls import include, path
 from . import views
 from doctors.views import doctorProfile
+
 app_name = 'patients'
 urlpatterns = [
     # path('dashboard/', views.patient_dashboard, name='patient_dashboard'),

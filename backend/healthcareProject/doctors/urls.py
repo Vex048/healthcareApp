@@ -8,4 +8,6 @@ urlpatterns = [
     path("doctorProfile/<int:id>",views.doctorProfile,name='doctorProfile'),
     path("makeAppointment/<int:id>",views.makeAppointment,name='makeAppointment'),
     path("createReport/",views.createReport,name='createReport'),
+    path("listModels/",views.listModels,name='listModels'),
+    path("model/<int:id>",views.model,name='model'),
 ]

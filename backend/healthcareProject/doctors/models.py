@@ -38,3 +38,15 @@ class Appointment(models.Model):
     description=models.TextField(null=True,blank=True)
     def __str__(self):
         return self.doctor_id.first_name + " " + self.doctor_id.last_name + " " + self.patient_id.user.username + " " + str(self.date) + " " + str(self.time)
+class DLModels(models.Model):
+    model = models.FileField(upload_to='models/',null=True,blank=True)
+    type = models.TextField(null=True,blank=True)
+    descritpion = models.TextField(null=True,blank=True)
+    def __str__(self):
+        return self.type
+class ModelResult(models.Model):
+    model_id=models.ForeignKey(DLModels,on_delete=models.CASCADE)
+    result=models.TextField()
+    date=models.DateField()
+    def __str__(self):
+        return self.model_id.type + " " + str(self.date)
