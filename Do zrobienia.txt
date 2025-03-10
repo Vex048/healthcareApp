@@ -1,8 +1,0 @@
--Ulepszenie strony głównej
--Podzielenie profilu pokazywanie najbliższego Appointmentu oraz możliwośc przejśćia do wszystkich appoitnmentów(inna strona)
--Przejście do Medycznego Rekordu użytkownika(inna strona)
-- Możliwość umówienia się do tego samego lekarza (jakiś href)
-- Doktor (modele sztucznej inteligencji)
-- Doktor musi mieć pokazany kalendarzyk, kiedy jest dostępny,
-- i Pacjent może sobie wybrać dany termin 
-- Do tego lekarza
