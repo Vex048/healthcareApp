@@ -4,16 +4,20 @@
 
 
 <div class="appointment-form">
-    <h1>Make an Appointment</h1>
+    <h1>Make an Appointment with Dr.{{ doctor.user.get_full_name }}</h1>
     <form method="POST" action="">
         {% csrf_token %}
         <div class="form-group">
             <label for="date">Date</label>
-            <input type="date" class="form-control" id="date" name="date">
+            <input type="date" class="form-control" id="date" name="date" required value="{{ initial_date }}">
         </div>
         <div class="form-group">
             <label for="time">Time</label>
-            <input type="time" class="form-control" id="time" name="time">
+            <select id="time" name="time" required>
+                {% for time in available_times %}
+                <option value="{{ time }}">{{ time }}</option>
+                {% endfor %}
+            </select>
         </div>
         <div class="form-group">
             <label for="description">Description</label>
@@ -23,6 +27,35 @@
         <button type="submit" class="btn btn-primary">Submit</button>
         </div>
     </form>
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+    let selectedDate = document.getElementById("date").value;
+    if (selectedDate) {
+        fetchAvailableTimes(selectedDate);
+    }
+
+    document.getElementById("date").addEventListener("change", function() {
+        fetchAvailableTimes(this.value);
+    });
+
+    function fetchAvailableTimes(date) {
+        let doctorId = "{{ doctor.id }}";
+        let timeDropdown = document.getElementById("time");
+
+        fetch(`/doctor/${doctorId}/available-times/${date}/`)
+            .then(response => response.json())
+            .then(data => {
+                timeDropdown.innerHTML = "<option value=''>-- Select a time --</option>";
+                data.available_times.forEach(time => {
+                    let option = document.createElement("option");
+                    option.value = time;
+                    option.textContent = time;
+                    timeDropdown.appendChild(option);
+                });
+            });
+    }
+});
+    </script>
 </div>
 </div>
 {% endblock %}

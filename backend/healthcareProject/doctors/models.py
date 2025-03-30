@@ -30,6 +30,16 @@ class Schedule(models.Model):
     def __str__(self):
         return self.doctor_id.first_name + " " + self.doctor_id.last_name + " " + self.day + " " + str(self.start_time) + " " + str(self.end_time)
     
+class Availability(models.Model):
+    doctor = models.ForeignKey(Doctor, on_delete=models.CASCADE, related_name="availability_slots")
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    is_available = models.BooleanField(default=True)
+    def __str__(self):
+        return f"{self.doctor.user.get_full_name()} - {self.date} ({self.start_time} to {self.end_time})"
+    
+    
 class Appointment(models.Model):
     doctor_id=models.ForeignKey(Doctor,on_delete=models.CASCADE)
     patient_id=models.ForeignKey('patients.Patient',on_delete=models.CASCADE)
@@ -38,6 +48,7 @@ class Appointment(models.Model):
     description=models.TextField(null=True,blank=True)
     def __str__(self):
         return self.doctor_id.first_name + " " + self.doctor_id.last_name + " " + self.patient_id.user.username + " " + str(self.date) + " " + str(self.time)
+    
 class DLModels(models.Model):
     model = models.FileField(upload_to='models/',null=True,blank=True)
     type = models.TextField(null=True,blank=True)

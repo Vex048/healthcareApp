@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>Available Dates for Dr. {{ doctor.user.get_full_name }}</h1>
+    <div class="availability-show">
+        <ul>
+            {% for slot in available %}
+            <li>{{ slot.date }} - <a href="{% url 'doctors:makeAppointment' doctor.id slot.id %}">Book Now</a></li>
+            {% empty %}
+            <li>No available slots at the moment.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

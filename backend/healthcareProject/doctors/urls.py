@@ -6,8 +6,10 @@ urlpatterns = [
     # path('upload-image/', views.upload_image, name='upload_image'),
     path('showDoctors/', views.showDoctors, name='showDoctors'),
     path("doctorProfile/<int:id>",views.doctorProfile,name='doctorProfile'),
-    path("makeAppointment/<int:id>",views.makeAppointment,name='makeAppointment'),
+    path("makeAppointment/<int:id>/<int:slot_id>",views.makeAppointment,name='makeAppointment'),
     path("createReport/",views.createReport,name='createReport'),
     path("listModels/",views.listModels,name='listModels'),
     path("model/<int:id>",views.model,name='model'),
+    path("doctor_calendar/<int:id>",views.doctor_calendar,name="doctor_calendar"),
+    path('doctor/<int:doctor_id>/available-times/<str:date>/', views.get_available_times, name='get_available_times'),
 ]

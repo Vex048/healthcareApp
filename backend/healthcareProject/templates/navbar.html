@@ -2,6 +2,9 @@
     <a class="active" href="{% url 'home' %}">HealthcareApp</a>
     <div class="topnav-right">
         {% if user.is_authenticated %}
+            {% if request.user.doctor %}
+            <a href="{% url 'doctors:listModels' %}">Models</a>
+            {% endif %}
             <a href="{% url 'patients:profile' %}">Profile</a>
             <a href="{% url 'accounts:logout' %}">Logout</a>
         {% else %}

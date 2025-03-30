@@ -31,7 +31,7 @@
     </div>
     {% if user.is_authenticated %}
     <div class="button-view">
-        <a href="{% url 'doctors:makeAppointment' doctor.id %}" class="btn btn-primary">Book Appointment</a>
+        <a href="{% url 'doctors:doctor_calendar' doctor.id %}" class="btn btn-primary">Book Appointment</a>
     </div>
     {% endif %}
     {% if request.user.doctor and request.user.email == doctor.email%}

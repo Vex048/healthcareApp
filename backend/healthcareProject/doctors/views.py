@@ -1,8 +1,9 @@
-import datetime
-from django.shortcuts import render
+from datetime import datetime, timedelta
+from django.http import JsonResponse
+from django.shortcuts import redirect, render
 from django.contrib import messages
 from patients.models import Patient,MedicalRecord
-from .models import Appointment, DLModels, Doctor, ModelResult,Profile
+from .models import Appointment, DLModels, Doctor, ModelResult,Profile,Availability
 # Create your views here.
 def showDoctors(request):
     doctors = Doctor.objects.all()
@@ -21,15 +22,44 @@ def doctorProfile(request,id):
     context = {'doctor': doctor,'profile':profile, 'is_doctor': is_doctor}
     return render(request,'doctors/doctorProfile.html',context)
 
-def makeAppointment(request,id):
+
+
+def doctor_calendar(request,id):
+    doctor = Doctor.objects.get(id=id)
+    available = Availability.objects.filter(doctor=doctor)
+    context = {"available":available,"doctor":doctor}
+    return render(request,'doctors\showAvailability.html',context)
+    
+
+def get_available_times(request,doctor_id,date):
+    doctor = Doctor.objects.get(id=doctor_id)
+    availability = Availability.objects.filter(doctor=doctor,date=date,is_available=True)
+    times = [slot.start_time.strftime('%H:%M') for slot in availability]
+    return JsonResponse({'available_times': times})
+    
+    
+
+def makeAppointment(request,id,slot_id):
+    doc = Doctor.objects.get(id=id)
+    available = Availability.objects.get(id=slot_id)
+    formatted_date = available.date.strftime('%Y-%m-%d')
+    start_time = datetime.combine(available.date, available.start_time)
+    end_time = datetime.combine(available.date, available.end_time)
+    
+    available_times = []
+    while start_time < end_time:
+        available_times.append(start_time.strftime('%H:%M'))
+        start_time += timedelta(minutes=60)
+        
+        
+    context = {"doctor":doc,'initial_date':formatted_date,"available_times": available_times }
     if request.method == "POST":
         date = request.POST.get('date')
         time = request.POST.get('time')
         desc = request.POST.get('description')
-        doc = Doctor.objects.get(id=id)
         Appointment.objects.create(doctor_id=doc,patient_id=request.user.patient,date=date,time=time,description=desc)
-        return render(request, 'doctors/makeAppointment.html')
-    return render(request, 'doctors/makeAppointment.html')
+        return redirect('home')
+    return render(request, 'doctors/makeAppointment.html',context)
 
 def createReport(request):
     if request.method == "POST":
