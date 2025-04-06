@@ -4,6 +4,8 @@ from django.shortcuts import redirect, render
 from django.contrib import messages
 from patients.models import Patient,MedicalRecord
 from .models import Appointment, DLModels, Doctor, ModelResult,Profile,Availability
+from django.utils import timezone
+from .services.dl_models import pneumonia_model
 # Create your views here.
 def showDoctors(request):
     doctors = Doctor.objects.all()
@@ -26,7 +28,7 @@ def doctorProfile(request,id):
 
 def doctor_calendar(request,id):
     doctor = Doctor.objects.get(id=id)
-    available = Availability.objects.filter(doctor=doctor)
+    available = Availability.objects.filter(doctor=doctor,date__gte=datetime.now())
     context = {"available":available,"doctor":doctor}
     return render(request,'doctors\showAvailability.html',context)
     
@@ -34,7 +36,9 @@ def doctor_calendar(request,id):
 def get_available_times(request,doctor_id,date):
     doctor = Doctor.objects.get(id=doctor_id)
     availability = Availability.objects.filter(doctor=doctor,date=date,is_available=True)
-    times = [slot.start_time.strftime('%H:%M') for slot in availability]
+    times = []
+    for slot in availability:
+        times.append(slot.start_time.strftime('%H:%M'))
     return JsonResponse({'available_times': times})
     
     
@@ -83,10 +87,11 @@ def model(request,id):
     model = DLModels.objects.get(id=id)
     if request.method == "POST":
         image = request.FILES['image']
-        print(str(image))  
         #Proccesing image with model
-        result = "Output of model will be here"   
-        result = ModelResult.objects.create(model_id=model,result=result,date=datetime.datetime.now())
+        img = pneumonia_model.preprocces_image(image)
+        prediction = pneumonia_model.predict(img)
+        result = pneumonia_model.interpret_result(prediction)
+        result = ModelResult.objects.create(model_id=model,result=result,date=datetime.now())
         messages.success(request, 'Result added')
         context = {'model':model,'result':result}
         return render(request,'doctors/models/results.html',context)
