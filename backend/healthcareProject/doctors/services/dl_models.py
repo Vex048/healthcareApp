@@ -12,13 +12,11 @@ class PneunomiaModelService:
         self.model = tf.keras.models.load_model(self.model_path)
         
     def resize_img(self,img):
-        # For Django uploaded files
         if hasattr(img, 'read'):
-            img_bytes = img.read()  # Read the file-like object
-            img_array = np.frombuffer(img_bytes, np.uint8)  # Use uint8, not float32
-            img = cv2.imdecode(img_array, cv2.IMREAD_GRAYSCALE)  # For grayscale (1 channel)
+            img_bytes = img.read()  
+            img_array = np.frombuffer(img_bytes, np.uint8)  
+            img = cv2.imdecode(img_array, cv2.IMREAD_GRAYSCALE) 
 
-        # If it's already a numpy array, keep it as is
         if img is None:
             raise ValueError("Failed to decode the image")
             
@@ -42,7 +40,6 @@ class PneunomiaModelService:
         else:
             return "The model didnt detect pneunomia"
         
-        
-MODEL_PATH = Path(PATH_TO_MODEL_PNEUNOMIA)
+MODEL_PATH = Path("C:/Projects/healthcare/healthcare/backend/healthcareProject/weights/pneunomia_model.h5")
 pneumonia_model = PneunomiaModelService(MODEL_PATH)
 pneumonia_model.load_model()  

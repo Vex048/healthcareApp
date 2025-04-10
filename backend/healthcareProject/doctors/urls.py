@@ -12,4 +12,5 @@ urlpatterns = [
     path("model/<int:id>",views.model,name='model'),
     path("doctor_calendar/<int:id>",views.doctor_calendar,name="doctor_calendar"),
     path('doctor/<int:doctor_id>/available-times/<str:date>/', views.get_available_times, name='get_available_times'),
+    path('doctor/<int:doctor_id>/create-availability/', views.createAvailability, name='createAvailability'),
 ]

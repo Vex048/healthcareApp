@@ -29,11 +29,7 @@
             </tr>
         </table>
     </div>
-    {% if user.is_authenticated %}
-    <div class="button-view">
-        <a href="{% url 'doctors:doctor_calendar' doctor.id %}" class="btn btn-primary">Book Appointment</a>
-    </div>
-    {% endif %}
+
     {% if request.user.doctor and request.user.email == doctor.email%}
     <div class="button-view">
         <a href="{% url 'doctors:createReport' %}" class="btn btn-primary">Create Report</a>
@@ -41,6 +37,10 @@
     <div class ="button-view">
         <a href="{% url 'doctors:listModels' %}" class="btn btn-primary">Go to your models</a>
     </div>
+    <div class ="button-view">
+        <a href="{% url 'doctors:createAvailability' doctor.id %}" class="btn btn-primary">Add availabilty</a>
+    </div>
+ 
     {% endif %}
     <div class="button-view">
       <a href = "{% url 'doctors:showDoctors' %}" class="btn btn-primary">Back</a>
