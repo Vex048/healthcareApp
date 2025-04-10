@@ -24,16 +24,17 @@ def doctorProfile(request,id):
     context = {'doctor': doctor,'profile':profile, 'is_doctor': is_doctor}
     return render(request,'doctors/doctorProfile.html',context)
 
-def createAvailability(request,id):
-    doctor = Doctor.objects.get(id=id)
+def createAvailability(request):
+    doctor = Doctor.objects.get(user=request.user)
+    available_days = Availability.objects.filter(doctor=doctor,date__gte=datetime.now())
     if request.method == "POST":
         date = request.POST.get('date')
         start_time = request.POST.get('start_time')
         end_time = request.POST.get('end_time')
-        availability = Availability.objects.create(doctor=doctor,date=date,start_time=start_time,end_time=end_time,is_available=True)
+        Availability.objects.create(doctor=doctor,date=date,start_time=start_time,end_time=end_time,is_available=True)
         messages.success(request, 'Availability added')
-        return redirect('doctor_profile',id=doctor.id)
-    context = {'doctor': doctor}
+        return redirect('doctors:doctorProfile',id=doctor.id)
+    context = {'available': available_days,'doctor':doctor}
     return render(request,'doctors/createAvailability.html',context)
 
 def doctor_calendar(request,id):
