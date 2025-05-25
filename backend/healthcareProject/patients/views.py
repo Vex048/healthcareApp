@@ -41,3 +41,6 @@ def view_appointments(request,id):
     context = {'appointments': appointments}
     return render(request, 'patients/appointments.html',context)
     
+
+def render_chatbot(request):
+    return render(request,'patients/chatbot.html')

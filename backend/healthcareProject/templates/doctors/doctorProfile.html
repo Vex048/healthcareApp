@@ -38,7 +38,7 @@
         <a href="{% url 'doctors:createAvailability' %}" class="btn btn-primary">Add availabilty</a>
     </div>
     {% endif %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated  and request.user.email != doctor.email  %}
      <div class="button-view">
          <a href="{% url 'doctors:doctor_calendar' doctor.id %}" class="btn btn-primary">Book Appointment</a>
      </div>

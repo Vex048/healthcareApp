@@ -7,6 +7,7 @@
             {% endif %}
             <a href="{% url 'patients:profile' %}">Profile</a>
             <a href="{% url 'accounts:logout' %}">Logout</a>
+            <a href="{% url 'patients:chatbot' %}">Chatbot</a>
         {% else %}
             <a href="{% url 'accounts:login' %}">Login</a>
             <a href="{% url 'accounts:register' %}">Register</a>
