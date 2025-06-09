@@ -10,6 +10,8 @@ urlpatterns = [
     path("doctorProfile/<int:id>",doctorProfile,name='doctorProfile'),
     path('view_records/<int:id>', views.view_records, name='view_records'),
     path("view_appoinments/<int:id>",views.view_appointments,name='view_appointments'),
-    path('chatbot',views.render_chatbot,name='chatbot')
+    path('chatbot',views.render_chatbot,name='chatbot'),
+    path('cancel_appointment/<int:appointment_id>/', views.cancel_appointment, name='cancel_appointment'),
+    
     
 ]

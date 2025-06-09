@@ -12,5 +12,7 @@ urlpatterns = [
     path("model/<int:id>",views.model,name='model'),
     path("doctor_calendar/<int:id>",views.doctor_calendar,name="doctor_calendar"),
     #path('doctor/<int:doctor_id>/available-times/<str:date>/', views.get_available_times, name='get_available_times'),
-    path('create-availability/', views.createAvailability, name='createAvailability'),
+    path('create_availability/', views.createAvailability, name='createAvailability'),
+    path('delete_availability/<int:availability_id>/', views.delete_availability, name='delete_availability'),
+    path('manage_availabilities',views.manage_availability,name='manage_availability')
 ]

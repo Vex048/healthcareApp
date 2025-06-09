@@ -32,7 +32,16 @@ def view_records(request,id):
 
 def upcomingAppointmets(request):
     patient = Patient.objects.get(user=request.user)
-    
+
+
+def cancel_appointment(request,appointment_id):
+    if request.method == "POST":
+        appointment = Appointment.objects.get(id=appointment_id)
+        appointment.delete()
+        patient_id = request.user.patient.id
+        return redirect('patients:view_appointments',id=patient_id)
+        
+     
     
 
 def view_appointments(request,id):

@@ -6,21 +6,26 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Appointment ID</th>
                 <th>Doctor</th>
                 <th>Date</th>
                 <th>Time</th>
                 <th>Description</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
             {% for appointment in appointments %}
             <tr>
-                <td>{{ appointment.id }}</td>
                 <td><a class="doctor-link" href="{% url 'doctors:doctorProfile' appointment.doctor_id.id %}">{{ appointment.doctor_id }}</a></td>
                 <td>{{ appointment.date }}</td>
                 <td>{{ appointment.time }}</td>
                 <td> {{ appointment.description }}</td>
+                <td>
+                    <form method="POST" action="{% url 'patients:cancel_appointment' appointment.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Cancel</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </tbody>

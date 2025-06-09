@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="chatbot-container">
+    <h1>Healthcare Chatbot</h1>
+    <div id="chat-window" class="chat-window">
+        {% for msg in chatbot_messages %}
+        <div class="chat-message {% if msg.if_bot %}bot{% else %}user{% endif %}">
+            <strong>{% if msg.if_bot %}Bot{% else %}You{% endif %}:</strong>
+            {{ msg.message }}
+            <span class="timestamp">{{ msg.timestamp }}</span>
+        </div>
+        {% endfor %}
+    </div>
+    <form id="chat-form" class="chat-form" method="post" autocomplete="off">
+        {% csrf_token %}
+        <input type="text" id="user-input" name="message" placeholder="Type your message..." required>
+        <button type="submit" id="send-btn">Send</button>
+    </form>
+</div>
+
+<script>
+document.getElementById('chat-form').onsubmit = async function(e) {
+    e.preventDefault();
+    const input = document.getElementById('user-input');
+    const chatWindow = document.getElementById('chat-window');
+     const sendBtn = document.getElementById('send-btn');
+    const message = input.value.trim();
+    if (!message) return;
+
+    sendBtn.disabled = true;
+    // Show user message
+    chatWindow.innerHTML += `<div class="chat-message user"><strong>You:</strong> ${message}</div>`;
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+    input.value = '';
+
+    // Send to backend
+    try{
+    const response = await fetch("", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({message})
+    });
+    const data = await response.json();
+
+    // Show bot reply
+    chatWindow.innerHTML += `<div class="chat-message bot"><strong>Bot:</strong> ${data.reply}</div>`;
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+    finally {
+        sendBtn.disabled=false;
+    }
+
+};
+</script>
+{% endblock %}

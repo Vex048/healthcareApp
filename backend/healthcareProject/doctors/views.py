@@ -112,6 +112,8 @@ def makeAppointment(request,id,slot_id):
         return redirect('home')
     return render(request, 'doctors/makeAppointment.html',context)
 
+
+# Rezygnacja z tej funckji na rzecz manage_availabiites
 @login_required
 def createReport(request):
     if request.method == "POST":
@@ -148,3 +150,67 @@ def model(request,id):
         return render(request,'doctors/models/results.html',context)
     context = {'model':model}
     return render(request,'doctors/models/models_template.html',context)
+
+
+@login_required
+def manage_availability(request):
+    try:
+        doctor = Doctor.objects.get(user=request.user)
+    except Doctor.DoesNotExist:
+        messages.error(request, "You don't have doctor privileges")
+        return redirect('home')
+    
+    
+    availabilities = Availability.objects.filter(
+        doctor=doctor,
+        date__gte=datetime.now()
+    ).order_by('date', 'start_time')
+    
+    if request.method == "POST":
+        date = request.POST.get('date')
+        start_time = request.POST.get('start_time')
+        end_time = request.POST.get('end_time')
+        
+        if not all([date, start_time, end_time]):
+            messages.error(request, "You have to fill all of the fields")
+            context = {'availabilities': availabilities, 'doctor': doctor}
+            return render(request, 'doctors/manageAvailabilities.html', context)
+
+        Availability.objects.create(
+            doctor=doctor,
+            date=date,
+            start_time=start_time,
+            end_time=end_time,
+            is_available=True
+        )
+        messages.success(request, 'Availability added')
+        return redirect('doctors:manage_availability')
+    
+    context = {'available': availabilities, 'doctor': doctor} 
+    return render(request, 'doctors/manageAvailabilities.html', context)
+
+
+@login_required
+def delete_availability(request,availability_id):
+    try:
+        doctor = Doctor.objects.get(user=request.user)
+        availability = Availability.objects.get(id=availability_id, doctor=doctor)
+        
+        appointments_exist = Appointment.objects.filter(
+            doctor_id=doctor,
+            date=availability.date,
+            time__gte=availability.start_time,
+            time__lte=availability.end_time
+        ).exists()
+        
+        if appointments_exist:
+            messages.error(request, "Cannot delete availability with existing appointments")
+        else:
+            availability.delete()
+            messages.success(request, "Availability deleted successfully")
+    except Availability.DoesNotExist:
+        messages.error(request, "Availability not found")
+    except Doctor.DoesNotExist:
+        messages.error(request, "You don't have doctor privileges")
+        
+    return redirect('doctors:manage_availability')
