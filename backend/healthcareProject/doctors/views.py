@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from patients.models import Patient,MedicalRecord
 from .models import Appointment, DLModels, Doctor, ModelResult,Profile,Availability
@@ -26,10 +26,10 @@ def doctorProfile(request,id):
         context = {'doctor': doctor,'profile':profile, 'is_doctor': is_doctor}
         return render(request,'doctors/doctorProfile.html',context)
     except Doctor.DoesNotExist:
-        messages.error("The doctor_id is invalid, doctor not found")
+        messages.error(request,"The doctor_id is invalid, doctor not found")
         return redirect('home')
     except Profile.DoesNotExist:
-        messages.error("The profile does not exist")
+        messages.error(request,"The profile does not exist")
         return redirect('home')
 
 @login_required
@@ -37,7 +37,7 @@ def createAvailability(request):
     try:
         doctor = Doctor.objects.get(user=request.user)
     except Doctor.DoesNotExist:
-        messages.error("Doctor doestn exist")
+        messages.error(request,"Doctor doestn exist")
         return redirect('home')
     available_days = Availability.objects.filter(doctor=doctor,date__gte=datetime.now())
     if request.method == "POST":
@@ -58,7 +58,7 @@ def doctor_calendar(request,id):
     try:
         doctor = Doctor.objects.get(id=id)
     except Doctor.DoesNotExist:
-        messages.error("Doctor dose not exist")
+        messages.error(request,"Doctor dose not exist")
         return redirect('home')
     available = Availability.objects.filter(doctor=doctor,date__gte=datetime.now())
     context = {"available":available,"doctor":doctor}
@@ -115,7 +115,7 @@ def makeAppointment(request,id,slot_id):
 
 # Rezygnacja z tej funckji na rzecz manage_availabiites
 @login_required
-def createReport(request):
+def createReport(request, patient_id=None):
     if request.method == "POST":
         date = request.POST.get('date')
         desc = request.POST.get('description')
@@ -124,12 +124,14 @@ def createReport(request):
         doc = Doctor.objects.get(user=request.user)
         MedicalRecord.objects.create(doctor=doc,patient=patient,date=date,description=desc)
         return render(request, 'doctors/createReport.html')
-    #patients = Appointment.objects.filter(doctor_id = request.user.doctor).values_list('patient_id',flat=True)
-    appointments = Appointment.objects.filter(doctor_id = request.user.doctor).values_list('patient_id',flat=True)
-    
-    patients= Patient.objects.filter(id__in=appointments)
-    context = {"patients":patients}
-    return render(request, 'doctors/createReport.html',context)
+    else:
+        selected_patient = None
+        if patient_id:
+            selected_patient = get_object_or_404(Patient, id=patient_id)
+        appointments = Appointment.objects.filter(doctor_id = request.user.doctor).values_list('patient_id',flat=True)
+        patients= Patient.objects.filter(id__in=appointments)
+        context = {"patients":patients,"selected_patient": selected_patient}
+        return render(request, 'doctors/createReport.html',context)
 
 def listModels(request):
     models = DLModels.objects.all()
@@ -214,3 +216,26 @@ def delete_availability(request,availability_id):
         messages.error(request, "You don't have doctor privileges")
         
     return redirect('doctors:manage_availability')
+
+@login_required
+def showAppointments(request):
+    doctor = get_object_or_404(Doctor, user=request.user)
+    appointments = Appointment.objects.filter(doctor_id=doctor).order_by('date', 'time')
+    
+    context = {
+        'appointments': appointments,
+        'today': timezone.now().date()
+    }
+    return render(request, 'doctors/showAppointments.html', context)
+
+@login_required
+def cancel_appointment(request, appointment_id):
+    if request.method == "POST":
+        doctor = get_object_or_404(Doctor, user=request.user)
+        appointment = get_object_or_404(Appointment, id=appointment_id, doctor_id=doctor)
+        appointment.delete()
+        messages.success(request, "Appointment cancelled successfully")
+        return redirect('doctors:show_appointments')
+    
+    # If it's not a POST request, redirect to appointments list
+    return redirect('doctors:show_appointments')

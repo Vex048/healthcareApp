@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 import json
-
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 
@@ -20,11 +20,8 @@ def chatbot_view(request):
     # Ten and jest do AJAX -request
     if request.method == "POST":
         message = request.POST.get('message')
-        print("Tesst")
         ChatBotMessage.objects.create(user=request.user,message=message,if_bot=False)
-        print("test")
         reply = send_message_to_chatbot(message)
-        print("test")
         ChatBotMessage.objects.create(user=request.user,message=reply,if_bot=True)
         return JsonResponse({'reply': reply})
     return render(request, 'chatbot/chatbot.html',context)
@@ -32,9 +29,11 @@ def chatbot_view(request):
 
 def send_message_to_chatbot(message):
     data = {
-        "question": message
+        "question": message,
+        "id":"web-user",
+        "date": timezone.now().date()
     }
-    url_chatbot = 'http://192.168.1.42/service'
+    url_chatbot = 'http://192.168.1.42/question_model'
     try:
         response = requests.post(url=url_chatbot,json=data)
         bot_reply = response.json().get('reply')

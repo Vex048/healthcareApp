@@ -42,7 +42,6 @@ def registerUser(request):
     if request.method == "POST":
         form = AccountForm(request.POST)
         if form.is_valid():
-            # Create a new user
             user = User.objects.create_user(
                 username=form.cleaned_data['email'],  # Use email as the username
                 email=form.cleaned_data['email'],
@@ -51,7 +50,6 @@ def registerUser(request):
                 last_name=form.cleaned_data['last_name'],
             )
             Patient.objects.create(user=user, pesel=form.cleaned_data['pesel'])
-            # Log the user in
             login(request, user)
             return redirect('accounts:showAllUsers')
     else:

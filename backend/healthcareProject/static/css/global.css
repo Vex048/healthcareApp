@@ -676,3 +676,70 @@ input[type="button"] {
         font-size: 2rem;
     }
 }
+.message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    position: relative;
+}
+
+.message-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+.message-danger {
+      background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+}
+
+.message-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+}
+
+.message-info {
+    background-color: #d1ecf1;
+    border: 1px solid #bee5eb;
+    color: #0c5460;
+}
+
+.message-warning {
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    color: #856404;
+}
+
+.close-btn {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    cursor: pointer;
+    font-weight: bold;
+}
+    .form-wrapper p {
+        margin-bottom: 15px;
+    }
+    .form-wrapper label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .form-wrapper input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .form-wrapper .helptext {
+        display: block;
+        font-size: 0.8em;
+        color: #666;
+        margin-top: 5px;
+    }
+    .errorlist {
+        color: #721c24;
+        padding-left: 20px;
+    }
