@@ -1,2 +1,40 @@
-env/*
-backend/healthcareProject/env/*
+# Virtual Environments
+# Ignores any directory named 'env' or 'venv' anywhere in the project
+env/
+venv/
+.venv/
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+
+# Django specific files
+*.log
+db.sqlite3
+db.sqlite3-journal
+
+# User-uploaded files (if you have a media directory)
+media/
+
+# Collected static files for deployment
+staticfiles/
+
+# Environment variables and secrets
+# Never commit your .env files
+.env
+*.env
+
+# IDE and editor configuration files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS-generated files
+# For macOS
+.DS_Store
+# For Windows
+Thumbs.db
