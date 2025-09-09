@@ -25,8 +25,8 @@ This backend is designed to support a comprehensive healthcare platform. It enab
 
 ## Tech Stack
 
-- **Programming Language:** Python (or your specific language; update if different)
-- **Framework:** Django / Flask / FastAPI (update as appropriate)
-- **Database:** PostgreSQL / MySQL / MongoDB (update as appropriate)
-- **Authentication:** JWT / OAuth2 (update as appropriate)
+- **Programming Language:** Python 
+- **Framework:** Django /
+- **Database:** Sqlite3
+- **Authentication:** OAuth2 
 
