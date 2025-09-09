@@ -1,11 +1,36 @@
-IN PROGRESS!!!!!!!
+# Healthcare Project Backend
 
-Healthcare Management System with Django and TensorFlow 
+Welcome to the backend of the **Healthcare Project**! This service powers the core functionalities for our healthcare application, providing APIs and business logic to manage patients, appointments, medical records, and more.
 
-This project is a healthcare management system built with Django, integrated with a TensorFlow model for pneumonia detection. It includes features like doctor and patient management, appointment scheduling, medical record creation, and AI-powered diagnostic tools.
+## Table of Contents
 
-Key Features:
-* Doctor and Patient Management: Manage profiles, schedules, and availability.
-* Appointment Scheduling: Book and manage appointments with doctors.
-* Medical Records: Create and store patient medical records.
-* AI-Powered Pneumonia Detection: Upload chest X-ray images for analysis using a pre-trained TensorFlow model
+- [Project Overview](#project-overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+
+---
+
+## Project Overview
+
+This backend is designed to support a comprehensive healthcare platform. It enables secure management of patient information, appointment scheduling, doctor-patient interactions, and other essential healthcare operations.
+
+## Features
+
+- **Patient Management:** Register, update, and manage patient profiles.
+- **Appointment Scheduling:** Book, modify, and cancel appointments.
+- **Medical Records:** Store and retrieve medical history and reports.
+- **Authentication & Authorization:** Secure login for doctors, patients, and admins.
+- **RESTful API:** Well-structured endpoints for integration.
+- **Error Handling & Validation:** Robust input validation and error responses.
+
+## Tech Stack
+
+- **Programming Language:** Python 
+- **Framework:** Django 
+- **Database:** Sqlite3
+- **Authentication:** OAuth2
+
+## Medical ChatBot
+
+Check out my [Medical ChatBot Repository](https://github.com/Vex048/MedicalChatBot)
+
