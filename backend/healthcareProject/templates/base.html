@@ -9,6 +9,16 @@
 </head>
 <body>
     {% include 'navbar.html' %}
+    <div class="container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="message {% if message.tags == 'error' %}message-error{% else %}message-{{ message.tags }}{% endif %}">
+                {{ message }}
+                <span class="close-btn" onclick="this.parentElement.style.display='none';">&times;</span>
+            </div>
+        {% endfor %}
+    {% endif %}
+    </div>
     <main>
         {% block content %}
         {% endblock %}

@@ -4,9 +4,11 @@
         {% if user.is_authenticated %}
             {% if request.user.doctor %}
             <a href="{% url 'doctors:listModels' %}">Models</a>
+            <a href="{% url 'doctors:manage_availability' %}">Manage Availability</a>
             {% endif %}
             <a href="{% url 'patients:profile' %}">Profile</a>
             <a href="{% url 'accounts:logout' %}">Logout</a>
+            <a href="{% url 'chatbot:chatbot' %}">Chatbot</a>
         {% else %}
             <a href="{% url 'accounts:login' %}">Login</a>
             <a href="{% url 'accounts:register' %}">Register</a>

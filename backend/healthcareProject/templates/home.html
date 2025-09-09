@@ -1,24 +1,170 @@
 {% extends "base.html" %}
-{% block content %}
-<div class="container">
-    <h1>Welcome to HealthcareApp</h1>
-    <p>Your one-stop solution for managing healthcare services.</p>
-    
-    <div class="features">
-        <h2>Features</h2>
-        <ul>
-            <li>Manage appointments</li>
-            <li>Access medical records</li>
-            <li>Consult with doctors online</li>
-            <li>Receive health tips and updates</li>
-        </ul>
-        <div class = "button-view">
-            <a href="{% url 'accounts:showAllUsers' %}" class="btn btn-primary">Show all users</a>
-        </div>
+{% load static %}
 
-        <div class = "button-view">
-            <a href="{% url 'doctors:showDoctors' %}" class="btn btn-primary">Show all Doctors</a>
-        </div>        
+{% block content %}
+<div class="home-container">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-content">
+            <h1 >Welcome to HealthcareApp</h1>
+            <p>Your partner in health and wellness</p>
+            {% if not user.is_authenticated %}
+                <div class="hero-buttons">
+                    <a href="{% url 'accounts:login' %}" class="btn btn-primary">Sign In</a>
+                    <a href="{% url 'accounts:register' %}" class="btn btn-secondary">Register</a>
+                </div>
+            {% endif %}
+        </div>
     </div>
+
+    <!-- Dashboard Section -->
+    {% if user.is_authenticated %}
+        <div class="dashboard">
+            <h2>Your Dashboard</h2>
+            
+            {% if request.user.doctor %}
+                <!-- Doctor Dashboard -->
+                <div class="dashboard-cards">
+                    <div class="card dashboard-card">
+                        <div class="card-icon">
+                            <i class="fas fa-calendar-check"></i>
+                        </div>
+                        <h3>Today's Appointments</h3>
+                        <p class="count">{{ today_appointments|length }}</p>
+                        <a href="{% url 'doctors:manage_availability' %}" class="card-link">View Schedule</a>
+                    </div>
+                    
+                    <div class="card dashboard-card">
+                        <div class="card-icon">
+                            <i class="fas fa-user-injured"></i>
+                        </div>
+                        <h3>Your Patients</h3>
+                        <p class="count">{{ total_patients }}</p>
+                        <a href="{% url 'doctors:createReport' %}" class="card-link">Create Report</a>
+                    </div>
+                    
+                    <div class="card dashboard-card">
+                        <div class="card-icon">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>AI Diagnosis</h3>
+                        <a href="{% url 'doctors:listModels' %}" class="card-link">Use Models</a>
+                    </div>
+                </div>
+                
+                <!-- Recent Appointments -->
+                <div class="recent-section">
+                    <h3>Upcoming Appointments</h3>
+                    {% if upcoming_appointments %}
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in upcoming_appointments %}
+                                <tr>
+                                    <td>{{ appointment.patient_id.user.get_full_name }}</td>
+                                    <td>{{ appointment.date }}</td>
+                                    <td>{{ appointment.time }}</td>
+                                    <td>{{ appointment.description|truncatechars:30 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <p class="no-data">No upcoming appointments.</p>
+                    {% endif %}
+                </div>
+                
+            {% else %}
+                <!-- Patient Dashboard -->
+                <div class="dashboard-cards">
+                    <div class="card dashboard-card">
+                        <div class="card-icon">
+                            <i class="fas fa-calendar-alt"></i>
+                        </div>
+                        <h3>Your Appointments</h3>
+                        <p class="count">{{ upcoming_appointments|length }}</p>
+                        <a href="{% url 'patients:view_appointments' user.patient.id %}" class="card-link">View All</a>
+                    </div>
+                    
+                    <div class="card dashboard-card">
+                        <div class="card-icon">
+                            <i class="fas fa-file-medical"></i>
+                        </div>
+                        <h3>Medical Records</h3>
+                        <a href="{% url 'patients:view_records' user.patient.id %}" class="card-link">View Records</a>
+                    </div>
+                    
+                    <div class="card dashboard-card">
+                        <div class="card-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3>Chat with Bot</h3>
+                        <a href="{% url 'chatbot:chatbot' %}" class="card-link">Start Chat</a>
+                    </div>
+                </div>
+                
+                <!-- Find a Doctor -->
+                <div class="find-doctor-section">
+                    <h3>Find a Doctor</h3>
+                    <div class="search-box">
+                        <form method="get" action="{% url 'doctors:showDoctors' %}">
+                            <input type="text" name="q" placeholder="Search by name or specialty">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </form>
+                    </div>
+                    
+                    <div class="featured-doctors">
+                        <h4>Featured Doctors</h4>
+                        <div class="doctor-cards">
+                            {% for doctor in featured_doctors %}
+                            <div class="card doctor-card">
+                                <div class="doctor-info">
+                                    <h5>Dr. {{ doctor.user.get_full_name }}</h5>
+                                    <p>{{ doctor.profile.specialization }}</p>
+                                    <a href="{% url 'doctors:doctorProfile' doctor.id %}" class="btn btn-outline">View Profile</a>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <!-- Features Section (for non-logged in users) -->
+        <div class="features-section">
+            <h2>Our Services</h2>
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <h3>Find Specialists</h3>
+                    <p>Connect with qualified doctors across various specialties.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <h3>Easy Scheduling</h3>
+                    <p>Book and manage appointments with just a few clicks.</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3>AI-Powered Assistance</h3>
+                    <p>Get quick health guidance through our AI chatbot.</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div>
 {% endblock %}

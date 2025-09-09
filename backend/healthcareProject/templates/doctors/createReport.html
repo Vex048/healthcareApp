@@ -1,14 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class ="container">
+<h1>Create Medical Report</h1>
 <form method="POST" action="">
     {% csrf_token %}
     <div class="form-group">
         <label for="date">Patient</label>
         <select class="form-control" id="patient" name="patient" size="5">
-            {% for patient in patients %}
-            <option value="{{ patient.user.username }}">{{ patient.user.username }}</option>
-            {% endfor %}
+        {% for patient in patients %}
+            <option value="{{ patient.user.username }}" 
+                    {% if selected_patient and selected_patient.id == patient.id %}selected{% endif %}>
+                {{ patient.user.first_name }} {{ patient.user.last_name }}
+            </option>
+        {% endfor %}
         </select>
     </div>
     <div class="form-group">
@@ -22,4 +27,6 @@
     </div>
     <button type="submit" class="btn btn-primary">Submit</button>
 </form>
+    
+</div>
 {% endblock %}

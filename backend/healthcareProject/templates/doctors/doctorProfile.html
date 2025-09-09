@@ -35,10 +35,13 @@
         <a href="{% url 'doctors:createReport' %}" class="btn btn-primary">Create Report</a>
     </div>
     <div class ="button-view">
-        <a href="{% url 'doctors:createAvailability' %}" class="btn btn-primary">Add availabilty</a>
+        <a href="{% url 'doctors:manage_availability' %}" class="btn btn-primary">Add availabilty</a>
+    </div>
+    <div class ="button-view">
+        <a href="{% url 'doctors:show_appointments' %}" class="btn btn-primary">Show your appointments</a>
     </div>
     {% endif %}
-    {% if user.is_authenticated %}
+    {% if user.is_authenticated  and request.user.email != doctor.email  %}
      <div class="button-view">
          <a href="{% url 'doctors:doctor_calendar' doctor.id %}" class="btn btn-primary">Book Appointment</a>
      </div>

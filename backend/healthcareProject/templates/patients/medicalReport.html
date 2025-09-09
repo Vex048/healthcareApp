@@ -6,7 +6,6 @@
     <table class="table">
         <thead>
             <tr>
-                <th>Record ID</th>
                 <th>Doctor</th>
                 <th>Date</th>
                 <th>Description</th>
@@ -15,7 +14,6 @@
         <tbody>
             {% for record in medical_record %}
             <tr>
-                <td>{{ record.id }}</td>
                 <td> <a class="doctor-link" href="{% url 'doctors:doctorProfile' record.doctor.id %}"> {{ record.doctor }}</a></td>
                 <td>{{ record.date }}</td>
                 <td>{{ record.description }}</td>

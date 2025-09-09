@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
 from django.http import JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 from patients.models import Patient,MedicalRecord
 from .models import Appointment, DLModels, Doctor, ModelResult,Profile,Availability
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from .services.dl_models import pneumonia_model
-# Create your views here.
+
 def showDoctors(request):
     doctors = Doctor.objects.all()
     doctors = {'doctors': doctors}
@@ -14,23 +15,39 @@ def showDoctors(request):
 
 
 def doctorProfile(request,id):
-    doctor = Doctor.objects.get(id=id)
-    profile = Profile.objects.get(doctor_id=id)
     try:
-        is_doctor = Doctor.objects.filter(user=request.user).exists()
-    except:
-        is_doctor = None
-    #is_patient = Patient.objects.filter(user=request.user).exists()
-    context = {'doctor': doctor,'profile':profile, 'is_doctor': is_doctor}
-    return render(request,'doctors/doctorProfile.html',context)
+        doctor = Doctor.objects.get(id=id)
+        profile = Profile.objects.get(doctor_id=id)
+    
+        try:
+            is_doctor = Doctor.objects.filter(user=request.user).exists()
+        except:
+            is_doctor = None
+        context = {'doctor': doctor,'profile':profile, 'is_doctor': is_doctor}
+        return render(request,'doctors/doctorProfile.html',context)
+    except Doctor.DoesNotExist:
+        messages.error(request,"The doctor_id is invalid, doctor not found")
+        return redirect('home')
+    except Profile.DoesNotExist:
+        messages.error(request,"The profile does not exist")
+        return redirect('home')
 
+@login_required
 def createAvailability(request):
-    doctor = Doctor.objects.get(user=request.user)
+    try:
+        doctor = Doctor.objects.get(user=request.user)
+    except Doctor.DoesNotExist:
+        messages.error(request,"Doctor doestn exist")
+        return redirect('home')
     available_days = Availability.objects.filter(doctor=doctor,date__gte=datetime.now())
     if request.method == "POST":
         date = request.POST.get('date')
         start_time = request.POST.get('start_time')
         end_time = request.POST.get('end_time')
+        if not all([date, start_time, end_time]):
+                messages.error(request, "You have to fill all of the fields")
+                context = {'available': available_days, 'doctor': doctor}
+                return render(request, 'doctors/createAvailability.html', context)
         Availability.objects.create(doctor=doctor,date=date,start_time=start_time,end_time=end_time,is_available=True)
         messages.success(request, 'Availability added')
         return redirect('doctors:doctorProfile',id=doctor.id)
@@ -38,33 +55,52 @@ def createAvailability(request):
     return render(request,'doctors/createAvailability.html',context)
 
 def doctor_calendar(request,id):
-    doctor = Doctor.objects.get(id=id)
+    try:
+        doctor = Doctor.objects.get(id=id)
+    except Doctor.DoesNotExist:
+        messages.error(request,"Doctor dose not exist")
+        return redirect('home')
     available = Availability.objects.filter(doctor=doctor,date__gte=datetime.now())
     context = {"available":available,"doctor":doctor}
-    return render(request,'doctors\showAvailability.html',context)
+    return render(request,'doctors/showAvailability.html',context)
     
 
-def get_available_times(request,doctor_id,date):
-    doctor = Doctor.objects.get(id=doctor_id)
-    availability = Availability.objects.filter(doctor=doctor,date=date,is_available=True)
-    times = []
-    for slot in availability:
-        times.append(slot.start_time.strftime('%H:%M'))
-    return JsonResponse({'available_times': times})
+def get_time_slots(doctor,date_string):
+    date = datetime.strptime(date_string,'%Y-%m-%d').date()
+    availability = Availability.objects.get(doctor=doctor,date=date,is_available=True)
+    start_time = datetime.combine(availability.date, availability.start_time)
+    end_time = datetime.combine(availability.date, availability.end_time)
+    formatted_date = date.strftime('%Y-%m-%d')
     
-    
+    all_appointments_day = Appointment.objects.filter(doctor_id=doctor,date=formatted_date).values_list('time',flat=True)
+    booked_times=[]
+    for appointment_time in all_appointments_day:
+        if hasattr(appointment_time, 'strftime'):
+            booked_times.append(appointment_time.strftime('%H:%M'))
+        else:
+            booked_times.append(appointment_time)
+    available_times = []
+    while start_time < end_time:
+        curr_time = start_time.strftime('%H:%M')
+        if curr_time not in booked_times:    
+            available_times.append(curr_time)
+        start_time += timedelta(minutes=60)
+    return available_times
 
+
+# API Endpoint
+# def get_available_times(request,doctor_id,date):
+#     doctor = Doctor.objects.get(id=doctor_id)
+#     times = get_time_slots(doctor,str(date))
+#     return JsonResponse({'available_times': times})
+    
+    
+@login_required
 def makeAppointment(request,id,slot_id):
     doc = Doctor.objects.get(id=id)
     available = Availability.objects.get(id=slot_id)
     formatted_date = available.date.strftime('%Y-%m-%d')
-    start_time = datetime.combine(available.date, available.start_time)
-    end_time = datetime.combine(available.date, available.end_time)
-    
-    available_times = []
-    while start_time < end_time:
-        available_times.append(start_time.strftime('%H:%M'))
-        start_time += timedelta(minutes=60)
+    available_times = get_time_slots(doc,formatted_date)
         
         
     context = {"doctor":doc,'initial_date':formatted_date,"available_times": available_times }
@@ -76,7 +112,10 @@ def makeAppointment(request,id,slot_id):
         return redirect('home')
     return render(request, 'doctors/makeAppointment.html',context)
 
-def createReport(request):
+
+# Rezygnacja z tej funckji na rzecz manage_availabiites
+@login_required
+def createReport(request, patient_id=None):
     if request.method == "POST":
         date = request.POST.get('date')
         desc = request.POST.get('description')
@@ -85,9 +124,14 @@ def createReport(request):
         doc = Doctor.objects.get(user=request.user)
         MedicalRecord.objects.create(doctor=doc,patient=patient,date=date,description=desc)
         return render(request, 'doctors/createReport.html')
-    patients= Patient.objects.all()
-    context = {"patients":patients}
-    return render(request, 'doctors/createReport.html',context)
+    else:
+        selected_patient = None
+        if patient_id:
+            selected_patient = get_object_or_404(Patient, id=patient_id)
+        appointments = Appointment.objects.filter(doctor_id = request.user.doctor).values_list('patient_id',flat=True)
+        patients= Patient.objects.filter(id__in=appointments)
+        context = {"patients":patients,"selected_patient": selected_patient}
+        return render(request, 'doctors/createReport.html',context)
 
 def listModels(request):
     models = DLModels.objects.all()
@@ -108,3 +152,90 @@ def model(request,id):
         return render(request,'doctors/models/results.html',context)
     context = {'model':model}
     return render(request,'doctors/models/models_template.html',context)
+
+
+@login_required
+def manage_availability(request):
+    try:
+        doctor = Doctor.objects.get(user=request.user)
+    except Doctor.DoesNotExist:
+        messages.error(request, "You don't have doctor privileges")
+        return redirect('home')
+    
+    
+    availabilities = Availability.objects.filter(
+        doctor=doctor,
+        date__gte=datetime.now()
+    ).order_by('date', 'start_time')
+    
+    if request.method == "POST":
+        date = request.POST.get('date')
+        start_time = request.POST.get('start_time')
+        end_time = request.POST.get('end_time')
+        
+        if not all([date, start_time, end_time]):
+            messages.error(request, "You have to fill all of the fields")
+            context = {'availabilities': availabilities, 'doctor': doctor}
+            return render(request, 'doctors/manageAvailabilities.html', context)
+
+        Availability.objects.create(
+            doctor=doctor,
+            date=date,
+            start_time=start_time,
+            end_time=end_time,
+            is_available=True
+        )
+        messages.success(request, 'Availability added')
+        return redirect('doctors:manage_availability')
+    
+    context = {'available': availabilities, 'doctor': doctor} 
+    return render(request, 'doctors/manageAvailabilities.html', context)
+
+
+@login_required
+def delete_availability(request,availability_id):
+    try:
+        doctor = Doctor.objects.get(user=request.user)
+        availability = Availability.objects.get(id=availability_id, doctor=doctor)
+        
+        appointments_exist = Appointment.objects.filter(
+            doctor_id=doctor,
+            date=availability.date,
+            time__gte=availability.start_time,
+            time__lte=availability.end_time
+        ).exists()
+        
+        if appointments_exist:
+            messages.error(request, "Cannot delete availability with existing appointments")
+        else:
+            availability.delete()
+            messages.success(request, "Availability deleted successfully")
+    except Availability.DoesNotExist:
+        messages.error(request, "Availability not found")
+    except Doctor.DoesNotExist:
+        messages.error(request, "You don't have doctor privileges")
+        
+    return redirect('doctors:manage_availability')
+
+@login_required
+def showAppointments(request):
+    doctor = get_object_or_404(Doctor, user=request.user)
+    appointments = Appointment.objects.filter(doctor_id=doctor).order_by('date', 'time')
+    
+    context = {
+        'appointments': appointments,
+        'today': timezone.now().date()
+    }
+    return render(request, 'doctors/showAppointments.html', context)
+
+@login_required
+def cancel_appointment(request, appointment_id):
+    if request.method == "POST":
+        doctor = get_object_or_404(Doctor, user=request.user)
+        appointment = get_object_or_404(Appointment, id=appointment_id, doctor_id=doctor)
+        appointment.delete()
+        messages.success(request, "Appointment cancelled successfully")
+        return redirect('doctors:show_appointments')
+    
+    # If it's not a POST request, redirect to appointments list
+    return redirect('doctors:show_appointments')

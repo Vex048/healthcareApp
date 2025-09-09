@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <h1>Your Appointments</h1>
+    
+    {% if appointments %}
+        <div class="appointment-filters mb-4">
+            <button class="btn btn-outline-primary filter-btn active" data-filter="all">All</button>
+            <button class="btn btn-outline-primary filter-btn" data-filter="upcoming">Upcoming</button>
+            <button class="btn btn-outline-primary filter-btn" data-filter="past">Past</button>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                    <tr class="appointment-row {% if appointment.date < today %}past-appointment{% else %}upcoming-appointment{% endif %}">
+                        <td>{{ appointment.patient_id.user.get_full_name }}</td>
+                        <td>{{ appointment.date }}</td>
+                        <td>{{ appointment.time }}</td>
+                        <td>{{ appointment.description }}</td>
+                        <td>
+                            {% if appointment.date < today %}
+                                <span class="badge bg-secondary">Completed</span>
+                            {% else %}
+                                <span class="badge bg-primary">Upcoming</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if appointment.date >= today %}
+                                <a href="{% url 'doctors:cancel_appointment' appointment.id %}" class="btn btn-danger btn-sm" 
+                                   onclick="return confirm('Are you sure you want to cancel this appointment?');">Cancel</a>
+                            {% else %}
+                                <a href="{% url 'doctors:createReport_with_patient' appointment.patient_id.id %}" class="btn btn-primary btn-sm">Create Report</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            You don't have any appointments scheduled.
+        </div>
+    {% endif %}
+</div>
+<script>
+    // Simple JavaScript for filtering appointments
+    document.addEventListener('DOMContentLoaded', function() {
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const rows = document.querySelectorAll('.appointment-row');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Update active state
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.getAttribute('data-filter');
+                
+                rows.forEach(row => {
+                    if (filter === 'all') {
+                        row.style.display = '';
+                    } else if (filter === 'upcoming' && row.classList.contains('upcoming-appointment')) {
+                        row.style.display = '';
+                    } else if (filter === 'past' && row.classList.contains('past-appointment')) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}
