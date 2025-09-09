@@ -26,7 +26,7 @@ This backend is designed to support a comprehensive healthcare platform. It enab
 ## Tech Stack
 
 - **Programming Language:** Python 
-- **Framework:** Django /
+- **Framework:** Django 
 - **Database:** Sqlite3
 - **Authentication:** OAuth2 
 
