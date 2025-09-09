@@ -55,3 +55,57 @@ def registerUser(request):
     else:
         form = AccountForm()
     return render(request, 'accounts/register.html', {'form': form})
+
+
+
+
+
+from django.shortcuts import render
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import check_password
+from django.http import HttpResponse
+
+def test_password(request, username):
+    """Temporary debugging function - REMOVE AFTER TESTING"""
+    try:
+        user = User.objects.get(username=username)
+        
+        result = None
+        if request.method == 'POST':
+            password = request.POST.get('password')
+            if check_password(password, user.password):
+                result = f"Password '{password}' is CORRECT for user {username}"
+            else:
+                result = f"Password '{password}' is INCORRECT for user {username}"
+        
+        return render(request, 'accounts/test_password.html', {
+            'username': username,
+            'result': result
+        })
+    except User.DoesNotExist:
+        return HttpResponse(f"User {username} not found", status=404)
+    
+from django.contrib.auth.views import PasswordResetConfirmView
+from django.urls import reverse_lazy
+
+class DebugPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = 'accounts/password_reset_confirm.html'
+    success_url = reverse_lazy('accounts:password_reset_complete')
+    
+    def form_valid(self, form):
+        # Print debug info
+        print("=" * 50)
+        print("PASSWORD RESET FORM VALID")
+        print(f"User: {self.user.username}")
+        print(f"New password length: {len(form.cleaned_data['new_password1'])}")
+        print("=" * 50)
+        
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        """Override form_invalid to see validation errors"""
+        print("=" * 50)
+        print("PASSWORD RESET FORM INVALID")
+        print(f"Errors: {form.errors}")
+        print("=" * 50)
+        return super().form_invalid(form)

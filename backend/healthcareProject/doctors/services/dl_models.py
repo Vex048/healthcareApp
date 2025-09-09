@@ -74,7 +74,7 @@ class PneunomiaModelService:
         else:
             return "The model didn't detect pneumonia"
         
-#MODEL_PATH = Path("C:/Projects/healthcare/healthcare/backend/healthcareProject/weights/pneunomia_model.h5")
-MODEL_PATH = Path("D:/PythonProjects/TestDjangoVue/backend/healthcareProject/weights/pneunomia_model.h5")
+MODEL_PATH = Path("C:/Projects/healthcare/healthcare/backend/healthcareProject/weights/pneunomia_model.h5")
+#MODEL_PATH = Path("D:/PythonProjects/TestDjangoVue/backend/healthcareProject/weights/pneunomia_model.h5")
 pneumonia_model = PneunomiaModelService(MODEL_PATH)
 pneumonia_model.load_model()  
