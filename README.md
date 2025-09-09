@@ -28,5 +28,9 @@ This backend is designed to support a comprehensive healthcare platform. It enab
 - **Programming Language:** Python 
 - **Framework:** Django 
 - **Database:** Sqlite3
-- **Authentication:** OAuth2 
+- **Authentication:** OAuth2
+
+## Medical ChatBot
+
+Check out my [Medical ChatBot Repository](https://github.com/Vex048/MedicalChatBot)
 
