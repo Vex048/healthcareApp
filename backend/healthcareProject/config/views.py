@@ -8,23 +8,23 @@ def home(request):
     
     if request.user.is_authenticated:
         if hasattr(request.user, 'doctor'):
-            # For doctors
+            
             doctor = request.user.doctor
             today = datetime.now().date()
             
-            # Get today's appointments
+            
             today_appointments = Appointment.objects.filter(
                 doctor_id=doctor,
                 date=today
             ).order_by('time')
             
-            # Get upcoming appointments
+            
             upcoming_appointments = Appointment.objects.filter(
                 doctor_id=doctor,
                 date__gte=today
             ).order_by('date', 'time')[:5]
             
-            # Count total unique patients
+            
             total_patients = Appointment.objects.filter(
                 doctor_id=doctor
             ).values('patient_id').distinct().count()
@@ -35,18 +35,18 @@ def home(request):
                 'total_patients': total_patients
             })
         else:
-            # For patients
+            
             if hasattr(request.user, 'patient'):
                 patient = request.user.patient
                 today = datetime.now().date()
                 
-                # Get upcoming appointments
+                
                 upcoming_appointments = Appointment.objects.filter(
                     patient_id=patient,
                     date__gte=today
                 ).order_by('date', 'time')
                 
-                # Get featured doctors (example: showing 3 random doctors)
+                
                 featured_doctors = Doctor.objects.all().order_by('?')[:3]
                 
                 context.update({

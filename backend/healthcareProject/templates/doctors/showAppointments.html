@@ -37,12 +37,16 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if appointment.date >= today %}
-                                <a href="{% url 'doctors:cancel_appointment' appointment.id %}" class="btn btn-danger btn-sm" 
-                                   onclick="return confirm('Are you sure you want to cancel this appointment?');">Cancel</a>
-                            {% else %}
-                                <a href="{% url 'doctors:createReport_with_patient' appointment.patient_id.id %}" class="btn btn-primary btn-sm">Create Report</a>
-                            {% endif %}
+                        {% if appointment.date >= today %}
+                            <form method="post" action="{% url 'doctors:cancel_appointment' appointment.id %}" 
+                                onsubmit="return confirm('Are you sure you want to cancel this appointment?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                            </form>
+                        {% else %}
+                            <a href="{% url 'doctors:createReport_with_patient' appointment.patient_id.id %}" 
+                            class="btn btn-primary btn-sm">Create Report</a>
+                        {% endif %}
                         </td>
                     </tr>
                     {% endfor %}

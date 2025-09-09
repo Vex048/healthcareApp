@@ -141,15 +141,19 @@ def listModels(request):
 def model(request,id):
     model = DLModels.objects.get(id=id)
     if request.method == "POST":
-        image = request.FILES['image']
-        #Proccesing image with model
-        img = pneumonia_model.preprocces_image(image)
-        prediction = pneumonia_model.predict(img)
-        result = pneumonia_model.interpret_result(prediction)
-        result = ModelResult.objects.create(model_id=model,result=result,date=datetime.now())
-        messages.success(request, 'Result added')
-        context = {'model':model,'result':result}
-        return render(request,'doctors/models/results.html',context)
+        try:
+            image = request.FILES['image']
+            #Proccesing image with model
+            img = pneumonia_model.preprocces_image(image)
+            prediction = pneumonia_model.predict(img)
+            result = pneumonia_model.interpret_result(prediction)
+            result = ModelResult.objects.create(model_id=model,result=result,date=datetime.now())
+            messages.success(request, 'Result added')
+            context = {'model':model,'result':result}
+            return render(request,'doctors/models/results.html',context)
+        except:
+            messages.error(request,"There was an erorr with imgae/model")
+            return redirect('doctors:listModels')
     context = {'model':model}
     return render(request,'doctors/models/models_template.html',context)
 
@@ -237,5 +241,4 @@ def cancel_appointment(request, appointment_id):
         messages.success(request, "Appointment cancelled successfully")
         return redirect('doctors:show_appointments')
     
-    # If it's not a POST request, redirect to appointments list
     return redirect('doctors:show_appointments')
