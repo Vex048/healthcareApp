@@ -1,21 +1,16 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
-app_name = 'doctors'
+
+router = DefaultRouter()
+router.register(r"profiles", views.DoctorViewSet, basename="doctor")
+router.register(r"appointments", views.AppointmentViewSet, basename="appointment")
+router.register(r"availability", views.AvailabilityViewSet, basename="availability")
+router.register(r"models", views.DLModelsViewSet, basename="dlmodels")
+router.register(r"results", views.ModelResultViewSet, basename="modelresults")
+
+app_name = "doctors"
+
 urlpatterns = [
-    # path('dashboard/', views.doctor_dashboard, name='doctor_dashboard'),
-    # path('upload-image/', views.upload_image, name='upload_image'),
-    path('showDoctors/', views.showDoctors, name='showDoctors'),
-    path("doctorProfile/<int:id>",views.doctorProfile,name='doctorProfile'),
-    path("makeAppointment/<int:id>/<int:slot_id>",views.makeAppointment,name='makeAppointment'),
-    path("createReport/",views.createReport,name='createReport'),
-    path('createReport/<int:patient_id>/', views.createReport, name='createReport_with_patient'),
-    path("listModels/",views.listModels,name='listModels'),
-    path("model/<int:id>",views.model,name='model'),
-    path("doctor_calendar/<int:id>",views.doctor_calendar,name="doctor_calendar"),
-    #path('doctor/<int:doctor_id>/available-times/<str:date>/', views.get_available_times, name='get_available_times'),
-    path('create_availability/', views.createAvailability, name='createAvailability'),
-    path('delete_availability/<int:availability_id>/', views.delete_availability, name='delete_availability'),
-    path('manage_availabilities',views.manage_availability,name='manage_availability'),
-    path('show_appointments',views.showAppointments,name='show_appointments'),
-    path('cancel-appointment/<int:appointment_id>/', views.cancel_appointment, name='cancel_appointment'),
+    path("", include(router.urls)),
 ]

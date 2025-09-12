@@ -1,0 +1,31 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:healthcare_frontend/providers/router_provider.dart';
+import 'package:healthcare_frontend/utils/logger.dart';
+
+void main() {
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    runApp(ProviderScope(child: const MyApp()));
+  } catch (e) {
+    logger.e(e);
+  }
+}
+
+class MyApp extends ConsumerWidget {
+  const MyApp({super.key});
+
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(routerProvider);
+    return MaterialApp.router(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+      ),
+      routerConfig: router,
+    );
+  }
+}

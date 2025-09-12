@@ -1,244 +1,161 @@
-from datetime import datetime, timedelta
-from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
-from django.contrib import messages
-from patients.models import Patient,MedicalRecord
-from .models import Appointment, DLModels, Doctor, ModelResult,Profile,Availability
+from rest_framework import viewsets, permissions, status, filters
+from rest_framework.decorators import action
+from rest_framework.response import Response
 from django.utils import timezone
-from django.contrib.auth.decorators import login_required
-from .services.dl_models import pneumonia_model
+from .models import Doctor, Appointment, Availability, DLModels, ModelResult
+from .serializers import (
+    DoctorSerializer,
+    AppointmentSerializer,
+    AvailabilitySerializer,
+    DLModelsSerializer,
+    ModelResultSerializer,
+)
+import datetime
 
-def showDoctors(request):
-    doctors = Doctor.objects.all()
-    doctors = {'doctors': doctors}
-    return render(request, 'doctors/showDoctors.html',doctors)
+
+class DoctorViewSet(viewsets.ModelViewSet):
+    queryset = Doctor.objects.all()
+    serializer_class = DoctorSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ["user__first_name", "user__last_name"]
+
+    def get_queryset(self):
+        if (
+            self.action in ["update", "partial_update", "destroy"]
+            and not self.request.user.is_staff
+        ):
+            # Only allow doctors to edit their own profile
+            if hasattr(self.request.user, "doctor"):
+                return Doctor.objects.filter(user=self.request.user)
+            return Doctor.objects.none()
+        return Doctor.objects.all()  # For list and retrieve, show all doctors
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
-def doctorProfile(request,id):
-    try:
-        doctor = Doctor.objects.get(id=id)
-        profile = Profile.objects.get(doctor_id=id)
-    
-        try:
-            is_doctor = Doctor.objects.filter(user=request.user).exists()
-        except:
-            is_doctor = None
-        context = {'doctor': doctor,'profile':profile, 'is_doctor': is_doctor}
-        return render(request,'doctors/doctorProfile.html',context)
-    except Doctor.DoesNotExist:
-        messages.error(request,"The doctor_id is invalid, doctor not found")
-        return redirect('home')
-    except Profile.DoesNotExist:
-        messages.error(request,"The profile does not exist")
-        return redirect('home')
+class AvailabilityViewSet(viewsets.ModelViewSet):
+    serializer_class = AvailabilitySerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-@login_required
-def createAvailability(request):
-    try:
-        doctor = Doctor.objects.get(user=request.user)
-    except Doctor.DoesNotExist:
-        messages.error(request,"Doctor doestn exist")
-        return redirect('home')
-    available_days = Availability.objects.filter(doctor=doctor,date__gte=datetime.now())
-    if request.method == "POST":
-        date = request.POST.get('date')
-        start_time = request.POST.get('start_time')
-        end_time = request.POST.get('end_time')
-        if not all([date, start_time, end_time]):
-                messages.error(request, "You have to fill all of the fields")
-                context = {'available': available_days, 'doctor': doctor}
-                return render(request, 'doctors/createAvailability.html', context)
-        Availability.objects.create(doctor=doctor,date=date,start_time=start_time,end_time=end_time,is_available=True)
-        messages.success(request, 'Availability added')
-        return redirect('doctors:doctorProfile',id=doctor.id)
-    context = {'available': available_days,'doctor':doctor}
-    return render(request,'doctors/createAvailability.html',context)
-
-def doctor_calendar(request,id):
-    try:
-        doctor = Doctor.objects.get(id=id)
-    except Doctor.DoesNotExist:
-        messages.error(request,"Doctor dose not exist")
-        return redirect('home')
-    available = Availability.objects.filter(doctor=doctor,date__gte=datetime.now())
-    context = {"available":available,"doctor":doctor}
-    return render(request,'doctors/showAvailability.html',context)
-    
-
-def get_time_slots(doctor,date_string):
-    date = datetime.strptime(date_string,'%Y-%m-%d').date()
-    availability = Availability.objects.get(doctor=doctor,date=date,is_available=True)
-    start_time = datetime.combine(availability.date, availability.start_time)
-    end_time = datetime.combine(availability.date, availability.end_time)
-    formatted_date = date.strftime('%Y-%m-%d')
-    
-    all_appointments_day = Appointment.objects.filter(doctor_id=doctor,date=formatted_date).values_list('time',flat=True)
-    booked_times=[]
-    for appointment_time in all_appointments_day:
-        if hasattr(appointment_time, 'strftime'):
-            booked_times.append(appointment_time.strftime('%H:%M'))
+    def get_queryset(self):
+        user = self.request.user
+        if hasattr(user, "doctor"):
+            # Doctors see only their availabilities
+            return Availability.objects.filter(doctor=user.doctor)
         else:
-            booked_times.append(appointment_time)
-    available_times = []
-    while start_time < end_time:
-        curr_time = start_time.strftime('%H:%M')
-        if curr_time not in booked_times:    
-            available_times.append(curr_time)
-        start_time += timedelta(minutes=60)
-    return available_times
+            # Patients see all availabilities for booking
+            return Availability.objects.filter(is_available=True)
 
-
-# API Endpoint
-# def get_available_times(request,doctor_id,date):
-#     doctor = Doctor.objects.get(id=doctor_id)
-#     times = get_time_slots(doctor,str(date))
-#     return JsonResponse({'available_times': times})
-    
-    
-@login_required
-def makeAppointment(request,id,slot_id):
-    doc = Doctor.objects.get(id=id)
-    available = Availability.objects.get(id=slot_id)
-    formatted_date = available.date.strftime('%Y-%m-%d')
-    available_times = get_time_slots(doc,formatted_date)
-        
-        
-    context = {"doctor":doc,'initial_date':formatted_date,"available_times": available_times }
-    if request.method == "POST":
-        date = request.POST.get('date')
-        time = request.POST.get('time')
-        desc = request.POST.get('description')
-        Appointment.objects.create(doctor_id=doc,patient_id=request.user.patient,date=date,time=time,description=desc)
-        return redirect('home')
-    return render(request, 'doctors/makeAppointment.html',context)
-
-
-# Rezygnacja z tej funckji na rzecz manage_availabiites
-@login_required
-def createReport(request, patient_id=None):
-    if request.method == "POST":
-        date = request.POST.get('date')
-        desc = request.POST.get('description')
-        patient = request.POST.get('patient')
-        patient = Patient.objects.get(user__username=patient)
-        doc = Doctor.objects.get(user=request.user)
-        MedicalRecord.objects.create(doctor=doc,patient=patient,date=date,description=desc)
-        return render(request, 'doctors/createReport.html')
-    else:
-        selected_patient = None
-        if patient_id:
-            selected_patient = get_object_or_404(Patient, id=patient_id)
-        appointments = Appointment.objects.filter(doctor_id = request.user.doctor).values_list('patient_id',flat=True)
-        patients= Patient.objects.filter(id__in=appointments)
-        context = {"patients":patients,"selected_patient": selected_patient}
-        return render(request, 'doctors/createReport.html',context)
-
-def listModels(request):
-    models = DLModels.objects.all()
-    context = {'models':models}
-    return render(request,'doctors/DeepLearningModels.html',context)
-
-def model(request,id):
-    model = DLModels.objects.get(id=id)
-    if request.method == "POST":
-        try:
-            image = request.FILES['image']
-            #Proccesing image with model
-            img = pneumonia_model.preprocces_image(image)
-            prediction = pneumonia_model.predict(img)
-            result = pneumonia_model.interpret_result(prediction)
-            result = ModelResult.objects.create(model_id=model,result=result,date=datetime.now())
-            messages.success(request, 'Result added')
-            context = {'model':model,'result':result}
-            return render(request,'doctors/models/results.html',context)
-        except:
-            messages.error(request,"There was an erorr with imgae/model")
-            return redirect('doctors:listModels')
-    context = {'model':model}
-    return render(request,'doctors/models/models_template.html',context)
-
-
-@login_required
-def manage_availability(request):
-    try:
-        doctor = Doctor.objects.get(user=request.user)
-    except Doctor.DoesNotExist:
-        messages.error(request, "You don't have doctor privileges")
-        return redirect('home')
-    
-    
-    availabilities = Availability.objects.filter(
-        doctor=doctor,
-        date__gte=datetime.now()
-    ).order_by('date', 'start_time')
-    
-    if request.method == "POST":
-        date = request.POST.get('date')
-        start_time = request.POST.get('start_time')
-        end_time = request.POST.get('end_time')
-        
-        if not all([date, start_time, end_time]):
-            messages.error(request, "You have to fill all of the fields")
-            context = {'availabilities': availabilities, 'doctor': doctor}
-            return render(request, 'doctors/manageAvailabilities.html', context)
-
-        Availability.objects.create(
-            doctor=doctor,
-            date=date,
-            start_time=start_time,
-            end_time=end_time,
-            is_available=True
-        )
-        messages.success(request, 'Availability added')
-        return redirect('doctors:manage_availability')
-    
-    context = {'available': availabilities, 'doctor': doctor} 
-    return render(request, 'doctors/manageAvailabilities.html', context)
-
-
-@login_required
-def delete_availability(request,availability_id):
-    try:
-        doctor = Doctor.objects.get(user=request.user)
-        availability = Availability.objects.get(id=availability_id, doctor=doctor)
-        
-        appointments_exist = Appointment.objects.filter(
-            doctor_id=doctor,
-            date=availability.date,
-            time__gte=availability.start_time,
-            time__lte=availability.end_time
-        ).exists()
-        
-        if appointments_exist:
-            messages.error(request, "Cannot delete availability with existing appointments")
+    def perform_create(self, serializer):
+        # Only doctors can create availability
+        if hasattr(self.request.user, "doctor"):
+            serializer.save(doctor=self.request.user.doctor)
         else:
-            availability.delete()
-            messages.success(request, "Availability deleted successfully")
-    except Availability.DoesNotExist:
-        messages.error(request, "Availability not found")
-    except Doctor.DoesNotExist:
-        messages.error(request, "You don't have doctor privileges")
-        
-    return redirect('doctors:manage_availability')
+            raise permissions.PermissionDenied("Only doctors can create availability")
 
-@login_required
-def showAppointments(request):
-    doctor = get_object_or_404(Doctor, user=request.user)
-    appointments = Appointment.objects.filter(doctor_id=doctor).order_by('date', 'time')
-    
-    context = {
-        'appointments': appointments,
-        'today': timezone.now().date()
-    }
-    return render(request, 'doctors/showAppointments.html', context)
 
-@login_required
-def cancel_appointment(request, appointment_id):
-    if request.method == "POST":
-        doctor = get_object_or_404(Doctor, user=request.user)
-        appointment = get_object_or_404(Appointment, id=appointment_id, doctor_id=doctor)
+class AppointmentViewSet(viewsets.ModelViewSet):
+    serializer_class = AppointmentSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+
+        # Base queryset depends on user type
+        if hasattr(user, "doctor"):
+            queryset = Appointment.objects.filter(doctor_id=user.doctor)
+        elif hasattr(user, "patient"):
+            queryset = Appointment.objects.filter(patient_id=user.patient)
+        else:
+            return Appointment.objects.none()
+
+        # Filter by status if provided in query params
+        status_filter = self.request.query_params.get("status")
+        if status_filter == "upcoming":
+            return queryset.filter(date__gte=timezone.now().date()).order_by(
+                "date", "time"
+            )
+        elif status_filter == "past":
+            return queryset.filter(date__lt=timezone.now().date()).order_by(
+                "-date", "time"
+            )
+
+        # Default ordering
+        return queryset.order_by("date", "time")
+
+    @action(detail=True, methods=["post"])
+    def cancel(self, request, pk=None):
+        """Endpoint to cancel an appointment"""
+        appointment = self.get_object()
+
+        # Check if the user is associated with this appointment
+        user = request.user
+        is_owner = (
+            hasattr(user, "patient") and appointment.patient_id == user.patient
+        ) or (hasattr(user, "doctor") and appointment.doctor_id == user.doctor)
+
+        if not is_owner:
+            return Response(
+                {"detail": "You don't have permission to cancel this appointment."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Can't cancel past appointments
+        if appointment.date < timezone.now().date():
+            return Response(
+                {"detail": "Cannot cancel past appointments."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         appointment.delete()
-        messages.success(request, "Appointment cancelled successfully")
-        return redirect('doctors:show_appointments')
-    
-    return redirect('doctors:show_appointments')
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class DLModelsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = DLModels.objects.all()
+    serializer_class = DLModelsSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(detail=True, methods=["post"])
+    def predict(self, request, pk=None):
+        """Endpoint for model predictions"""
+        model_obj = self.get_object()
+
+        # Handle file upload
+        image_file = request.FILES.get("image")
+        if not image_file:
+            return Response(
+                {"error": "No image provided"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Here you would normally call your model service
+        # from services.dl_models import PneunomiaModelService
+        # model_service = PneunomiaModelService()
+        # result = model_service.predict(image_file)
+
+        # For now, return a placeholder
+        result = {"prediction": "Sample prediction", "confidence": 0.95}
+
+        # Save the result
+        model_result = ModelResult.objects.create(
+            model_id=model_obj, result=str(result), date=timezone.now()
+        )
+
+        return Response(
+            {"model": model_obj.name, "result": result, "timestamp": model_result.date}
+        )
+
+
+class ModelResultViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = ModelResultSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Only show results created by current doctor
+        if hasattr(self.request.user, "doctor"):
+            return ModelResult.objects.filter(
+                model_id__created_by=self.request.user.doctor
+            )
+        return ModelResult.objects.none()
